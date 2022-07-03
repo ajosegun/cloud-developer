@@ -37,13 +37,13 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   //! END @TODO1
 
-  app.get( "/filteredimage", async ( req: Request, res: Response ) => {
+  app.get( "/filteredimage", async ( req, res ) => {
       let url  = req.query.image_url;
 
       console.log( url)
 
       if ( !url ) {
-        return res.status(400)
+        res.status(400)
                   .send("Kindly provide an image url");
       }
 
@@ -52,6 +52,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
       res.sendFile(filePath, function(){
         deleteLocalFiles([filePath]);
       });
+
   } );
   
   // Root Endpoint

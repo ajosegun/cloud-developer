@@ -6,7 +6,7 @@ export const config = {
     "host": "udagramoadev.c0jpai2n9wf8.us-east-1.rds.amazonaws.com",
     "dialect": "postgres",
     "aws_region": process.env.AWS_REGION,
-    "aws_profile": process.env.AWS_PROFILE,
+    "aws_profile": process.env.PROFILE,
     "aws_media_bucket": "udagram-oa-dev"
   },
   "jwt": {
