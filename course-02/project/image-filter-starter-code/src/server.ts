@@ -1,17 +1,23 @@
-import express from 'express';
-import bodyParser from 'body-parser';
+import express from "express";
+import bodyParser from "body-parser";
+// import express, {json as parseJsonBody} from "express";
+
+require('dotenv').config();
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+
 
 (async () => {
 
   // Init the Express application
   const app = express();
 
+
   // Set the network port
   const port = process.env.PORT || 8082;
   
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
+  // app.use(parseJsonBody());
 
   // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
   // GET /filteredimage?image_url={{URL}}
@@ -30,6 +36,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
+
+  app.get( "/filteredimage", async ( req: Request, res: Response ) => {
+      let url  = req.query.image_url;
+
+      console.log( url)
+
+      if ( !url ) {
+        return res.status(400)
+                  .send("Kindly provide an image url");
+      }
+
+      const filePath = await filterImageFromURL(url);
+
+      res.sendFile(filePath, function(){
+        deleteLocalFiles([filePath]);
+      });
+  } );
   
   // Root Endpoint
   // Displays a simple message to the user
