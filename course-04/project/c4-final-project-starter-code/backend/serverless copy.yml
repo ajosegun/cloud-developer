@@ -1,12 +1,12 @@
 org: ajosegun
-app: todo-serverless
-service: todo-serverless
+app: serverless
+service: serverless
 
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-reqvalidator-plugin
-  - serverless-aws-documentation
+  # - serverless-aws-documentation
 
 provider:
   name: aws
@@ -21,16 +21,16 @@ provider:
 
   environment:
     PROJECT_NAME: udacity
-    TODOS_TABLE: todo-serverless-${self:provider.stage}
-    S3_BUCKET_NAME: todo-serverless-${self:provider.stage}
+    TODOS_TABLE: udacity-serverless-application-todo-${self:provider.stage}
+    S3_BUCKET_NAME: udacity-serverless-application-todo-${self:provider.stage}
 
 custom:
   documentation:
     api:
       info:
         version: '1.0.0'
-        title: todo-serverless
-        description: todo-serverless
+        title: serverless-api
+        description: serverless-api
     models:
       - name: CreateTodoRequest
         contentType: "application/json"
@@ -63,8 +63,12 @@ custom:
 
 functions:
 
+  RS256Auth:
+    handler: src/lambda/auth/rs256Auth0Authorizer.handler
+
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+    # handler: src/lambda/auth/rs256Auth0Authorizer.handler
 
   # TODO: Configure this function
   GetTodos:
@@ -74,7 +78,7 @@ functions:
           method: get
           path: todos
           cors: true
-          authorizer: Auth
+          authorizers: Auth
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
@@ -97,22 +101,18 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
           documentation:
             summary: "Create a new todo item"
             description: "Create a new todo item"
             requestModels:
               "application/json": CreateTodoRequest
-          reqValidatorName: RequestBodyValidator
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-      - Effect: Allow
-        Action:
-          - logs:DeleteLogGroup
-        Resource: arn:aws:logs:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
@@ -272,3 +272,7 @@ resources:
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*'
         Bucket: !Ref AttachmentsBucket
+
+# disabledDeprecations:
+#   - CODE_1 # To disable specific deprecation with code "CODE_1"
+#   - '*' # To disable all deprecation messages
